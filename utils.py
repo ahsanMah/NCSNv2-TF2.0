@@ -98,7 +98,7 @@ def _build_parser():
                         help="can be \'geometric\' or \'linear\' (default: geometric)")
     parser.add_argument('--steps', default=200000, type=int,
                         help="number of steps to train the model for (default: 200000)")
-    parser.add_argument('--learning_rate', default=0.001, type=float,
+    parser.add_argument('--learning_rate', default=0.0001, type=float,
                         help="learning rate for the optimizer")
     parser.add_argument('--batch_size', default=128, type=int,
                         help="batch size (default: 128)")
@@ -223,7 +223,7 @@ def try_load_model(save_dir, step_ckpt=-1, return_new_model=True, verbose=True, 
         model = MaskedRefineNet(filters=configs.config_values.filters, activation=tf.nn.elu, 
         splits=dict_splits[configs.config_values.dataset], y_conditioned=configs.config_values.y_cond)
 
-    optimizer = tf.keras.optimizers.Adam(learning_rate=configs.config_values.learning_rate)
+    optimizer = tf.keras.optimizers.Adamax(learning_rate=configs.config_values.learning_rate)
     step = 0
     evaluate_print_model_summary(model, verbose)
     

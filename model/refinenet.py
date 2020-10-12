@@ -5,7 +5,7 @@ from tensorflow.keras.layers import Multiply, concatenate, GlobalAveragePooling2
 
 from model.layers import RefineBlock, FullPreActivationBlock, InstanceNormalizationPlusPlus2D, FullPreActivationBlock
 
-class RefineNetMini(keras.Model):
+class RefineNetV1(keras.Model):
     def __init__(self, filters, activation, y_conditioned=False, splits=None):
         super(RefineNet, self).__init__()
         self.in_shape = None

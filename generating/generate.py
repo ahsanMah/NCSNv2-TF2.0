@@ -112,7 +112,7 @@ def sample_many(model, sigmas, batch_size=128, eps=2 * 1e-5, T=100, n_images=1):
         for i, sigma_i in enumerate(sigmas):
             alpha_i = eps * (sigma_i / sigmas[-1]) ** 2
             # idx_sigmas = tf.ones(batch.get_shape()[0], dtype=tf.int32) * i
-            sigma_val = tf.ones((batch.get_shape()[0],1,1,1) dtype=tf.float32) * sigma_i
+            sigma_val = tf.ones((batch.get_shape()[0],1,1,1), dtype=tf.float32) * sigma_i
             for t in range(T):
                 batch = sample_one_step(model, batch, sigma_val, alpha_i)
 
