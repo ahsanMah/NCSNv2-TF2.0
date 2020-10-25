@@ -64,9 +64,9 @@ def save_as_grid(images, filename, spacing=2, rows=None):
 
 
 @tf.function
-def sample_one_step(model, x, idx_sigmas, alpha_i):
+def sample_one_step(model, x, sigmas, alpha_i):
     z_t = tf.random.normal(shape=x.get_shape(), mean=0, stddev=1.0)
-    score = model([x, idx_sigmas])
+    score = model([x, sigmas])
     noise = tf.sqrt(alpha_i) * z_t
     return x + alpha_i / 2 * score + noise
 
@@ -200,16 +200,6 @@ def sample_and_save(model, sigmas, x=None, eps=2 * 1e-5, T=100, n_images=1, save
         image_size = x.shape
         n_images = image_size[0]
 
-    # # Use ground truth masks
-    # if (configs.config_values.dataset == "masked_fashion"):
-    #     print("Using groundtruth masks...")
-    #     x = x.numpy()
-    #     fashion_test = get_train_test_data("masked_fashion")[1]
-    #     fashion_test = fashion_test.batch(n_images).take(1)
-    #     f_samples = next(iter(fashion_test)).numpy()
-    #     x[...,-1] = f_samples[...,-1]
-    #     x = tf.constant(x)
-
     for i, sigma_i in enumerate(tqdm(sigmas, desc='Sampling for each sigma')):
         alpha_i = eps * (sigma_i / sigmas[-1]) ** 2
         # idx_sigmas = tf.ones(n_images, dtype=tf.int32) * i
@@ -218,7 +208,7 @@ def sample_and_save(model, sigmas, x=None, eps=2 * 1e-5, T=100, n_images=1, save
         for t in range(T):
             x = sample_one_step(model, x, sigma_val, alpha_i)
 
-            if (t + 1) % T == 0:
+            if (t + 1) % T == 0 and (i + 1) % 10 == 0:
                 save_as_grid(x, save_directory + f'sigma{i + 1}_t{t + 1}.png')
     return x
 
@@ -236,4 +226,4 @@ def main():
         os.makedirs(samples_directory)
 
     x0 = utils.get_init_samples()
-    sample_and_save(model, sigma_levels, x=x0, n_images=100, T=100, eps=2*1e-5, save_directory=samples_directory)
+    sample_and_save(model, sigma_levels, x=x0, n_images=100, T=5, eps=6.2*1e-6, save_directory=samples_directory)

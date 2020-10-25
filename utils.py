@@ -3,6 +3,8 @@ import os
 import re
 
 import tensorflow as tf
+import matplotlib.pyplot as plt
+from scipy.stats import norm
 
 import configs
 from model.refinenet import RefineNet
@@ -126,7 +128,10 @@ def _build_parser():
                         help="Number of checkopints to keep saved (default: 2)")
     parser.add_argument('--split', default='100,0', type=str,
                         help="Train/(Tune)/Test split e.g. 'train[:90%],train[-10%:],test' (default: train,test)")
-
+    parser.add_argument('--T', default=100, type=int,
+                        help="Number of iterations to sample for each sigma (default: 100)")
+    parser.add_argument('--eps', default=2*1e-5, type=int,
+                        help="Epsilon for generating samples (default: 2*1e-5)")
     return parser
 
 def get_command_line_args():
@@ -352,3 +357,25 @@ def manage_gpu_memory_usage():
         except RuntimeError as e:
             # Memory growth must be set before GPUs have been initialized
             print(e)
+
+'''
+Returns an optimal L value according to Technique 2 in NCSNv2 paper
+A range of Cs is also result to help pick a better value
+sigma_high should be largest intra-dataset Euclidean distance
+'''
+def suggest_optimal_L(dim = 32*32, sigma_high = 50.0, sigma_low = 0.01, limit=1000):
+    
+    def calc_C(L):
+        gamma = (sigma_low/sigma_high)**(1/(L-1))
+        D = np.sqrt(2*dim)
+        C = norm.cdf(D*(gamma-1) + 3*gamma) - norm.cdf(D*(gamma-1) - 3*gamma)
+        return C
+    
+    L_range = np.arange(2,limit) * 1.0
+    Cs = [calc_C(l) for l in L_range] # C value for every L
+    optimal_L = np.where(np.isclose(Cs,0.9, rtol=1e-3, atol=1e-3))[0][0]
+    optimal_C = Cs[optimal_L]
+    plt.plot(L_range, Cs)
+    print("Suggested Optimal: L={:d} w/ C={:.3f}".format(optimal_L, optimal_C))
+    
+    return optimal_L, Cs
