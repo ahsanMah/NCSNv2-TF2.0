@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 import configs
-from model.refinenet import RefineNet
+from model.refinenet import RefineNet, RefineNetV1
 # from model.resnet import ResNet
 
 dict_datasets_image_size = {
@@ -82,7 +82,7 @@ def check_args_validity(args):
     return
 
 def _build_parser():
-    parser = argparse.ArgumentParser(description='I AM A HELP MESSAGE')
+    parser = argparse.ArgumentParser(description='CLI Options')
     parser.add_argument('--experiment', default='train', help="what experiment to run (default: train)")
     parser.add_argument('--dataset', default='mnist',
                         help="tfds name of dataset (default: 'mnist')")
@@ -127,11 +127,11 @@ def _build_parser():
     parser.add_argument('--max_to_keep', default=2, type=int,
                         help="Number of checkopints to keep saved (default: 2)")
     parser.add_argument('--split', default='100,0', type=str,
-                        help="Train/(Tune)/Test split e.g. 'train[:90%],train[-10%:],test' (default: train,test)")
+                        help=r"optional train/validation split percentages e.g. 0.9*train, 0.1*train (default: all train, no val set)")
     parser.add_argument('--T', default=100, type=int,
-                        help="Number of iterations to sample for each sigma (default: 100)")
+                        help="number of iterations to sample for each sigma (default: 100)")
     parser.add_argument('--eps', default=2*1e-5, type=int,
-                        help="Epsilon for generating samples (default: 2*1e-5)")
+                        help="epsilon for generating samples (default: 2*1e-5)")
     return parser
 
 def get_command_line_args():
